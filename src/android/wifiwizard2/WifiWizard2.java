@@ -101,6 +101,9 @@ public class WifiWizard2 extends CordovaPlugin {
     private static final String SWITCH_TO_LOCATION_SETTINGS = "switchToLocationSettings";
     private static final String SPECIFIER_NETWORK = "specifierConnection"; //>=29
     private static final String SUGGEST_NETWORK = "suggestConnection"; //>=29
+    private static final String RESET_BIND_ALL = "resetBindAll"; // jayter
+    private static final String SET_BIND_ALL = "setBindAll"; // jayter
+    
 
     private static final int SCAN_RESULTS_CODE = 0; // Permissions request code for getScanResults()
     private static final int SCAN_CODE = 1; // Permissions request code for scan()
@@ -289,6 +292,10 @@ public class WifiWizard2 extends CordovaPlugin {
                 this.getConnectedSSID(callbackContext);
             } else if (action.equals(GET_CONNECTED_BSSID)) {
                 this.getConnectedBSSID(callbackContext);
+            } else if (action.equals(RESET_BIND_ALL)) {
+                this.resetBindAll(callbackContext); // jayter 
+            } else if (action.equals(SET_BIND_ALL)) {
+                this.setBindAll(callbackContext); // jayter
             } else {
                 callbackContext.error("Incorrect action parameter: " + action);
                 // The ONLY time to return FALSE is when action does not exist that was called
@@ -893,7 +900,7 @@ public class WifiWizard2 extends CordovaPlugin {
     private boolean disconnect(CallbackContext callbackContext) {
         Log.d(TAG, "WifiWizard2: disconnect entered.");
 
-        if (wifiManager.disconnect()) {
+        if (API_VERSION >= 29 || wifiManager.disconnect()) {
             maybeResetBindALL();
             callbackContext.success("Disconnected from current network");
             return true;
@@ -1739,7 +1746,7 @@ public class WifiWizard2 extends CordovaPlugin {
         Log.d(TAG, "maybeResetBindALL");
 
         // desired should have a value if receiver is registered
-        if (desired != null) {
+        if (desired != null || API_VERSION >= 29) { // jayter
 
             if (API_VERSION > 21) {
 
